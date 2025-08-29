@@ -1,0 +1,128 @@
+version: '3.8'
+
+services:
+  # PostgreSQL база данных
+  db:
+    image: postgres:15
+    container_name: django_rest_db
+    environment:
+      POSTGRES_DB: django_rest
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - django_network
+
+  # Redis для Celery
+  redis:
+    image: redis:7-alpine
+    container_name: django_rest_redis
+    ports:
+      - "6379:6379"
+    networks:
+      - django_network
+
+  # Django приложение
+  web:
+    build: .
+    container_name: django_rest_web
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+      - media_volume:/app/media
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=True
+      - SECRET_KEY=django-insecure-docker-key
+      - NAME=django_rest
+      - USER=postgres
+      - PASSWORD=postgres
+      - HOST=db
+      - PORT=5432
+      - REDIS_URL=redis://redis:6379/0
+      - EMAIL_HOST=smtp.yandex.ru
+      - EMAIL_PORT=465
+      - EMAIL_HOST_USER=${EMAIL_HOST_USER}
+      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
+      - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_PUBLISHABLE_KEY=${STRIPE_PUBLISHABLE_KEY}
+    depends_on:
+      - db
+      - redis
+    networks:
+      - django_network
+
+  # Celery worker
+  celery_worker:
+    build: .
+    container_name: django_rest_celery_worker
+    command: celery -A config worker --pool=solo -l info
+    volumes:
+      - .:/app
+      - media_volume:/app/media
+    environment:
+      - DEBUG=True
+      - SECRET_KEY=django-insecure-docker-key
+      - NAME=django_rest
+      - USER=postgres
+      - PASSWORD=postgres
+      - HOST=db
+      - PORT=5432
+      - REDIS_URL=redis://redis:6379/0
+      - EMAIL_HOST=smtp.yandex.ru
+      - EMAIL_PORT=465
+      - EMAIL_HOST_USER=${EMAIL_HOST_USER}
+      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
+      - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_PUBLISHABLE_KEY=${STRIPE_PUBLISHABLE_KEY}
+    depends_on:
+      - db
+      - redis
+      - web
+    networks:
+      - django_network
+
+  # Celery beat (планировщик)
+  celery_beat:
+    build: .
+    container_name: django_rest_celery_beat
+    command: celery -A config beat -l info
+    volumes:
+      - .:/app
+      - media_volume:/app/media
+    environment:
+      - DEBUG=True
+      - SECRET_KEY=django-insecure-docker-key
+      - NAME=django_rest
+      - USER=postgres
+      - PASSWORD=postgres
+      - HOST=db
+      - PORT=5432
+      - REDIS_URL=redis://redis:6379/0
+      - EMAIL_HOST=smtp.yandex.ru
+      - EMAIL_PORT=465
+      - EMAIL_HOST_USER=${EMAIL_HOST_USER}
+      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
+      - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_PUBLISHABLE_KEY=${STRIPE_PUBLISHABLE_KEY}
+    depends_on:
+      - db
+      - redis
+      - web
+    networks:
+      - django_network
+
+volumes:
+  postgres_data:
+  media_volume:
+
+networks:
+  django_network:
+    driver: bridge
