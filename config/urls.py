@@ -7,6 +7,8 @@ router.register(r'courses', CourseViewSet)
 
 urlpatterns = [
     path('api/', include(router.urls)),
-    path('api/', include('materials.urls')),
-    path('api/users/', include('users.urls')),
+    # Добавляем namespace для приложения materials
+    path('api/', include(('materials.urls', 'materials'), namespace='materials')),
+    # Добавляем namespace для приложения users
+    path('api/users/', include(('users.urls', 'users'), namespace='users')),
 ]
