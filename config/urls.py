@@ -11,4 +11,5 @@ urlpatterns = [
     path('api/', include(('materials.urls', 'materials'), namespace='materials')),
     # Добавляем namespace для приложения users
     path('api/users/', include(('users.urls', 'users'), namespace='users')),
+    path("api/", include("users.urls")),
 ]
