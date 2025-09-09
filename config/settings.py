@@ -1,6 +1,9 @@
 from pathlib import Path
 import os
 import dotenv
+from datetime import timedelta
+
+dotenv.load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -24,6 +27,7 @@ INSTALLED_APPS = [
     'users',
     'materials',
     "django_filters",
+    "rest_framework_simplejwt",
 ]
 
 MIDDLEWARE = [
@@ -58,9 +62,6 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 
 
-dotenv.load_dotenv()
-
-BASE_DIR = Path(__file__).resolve().parent.parent
 
 DATABASES = {
     'default': {
@@ -122,3 +123,19 @@ CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 AUTH_USER_MODEL = 'users.User'
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
+    "DEFAULT_PAGINATION_CLASS": ["rest_framework.pagination.PageNumberPagination"],
+    "PAGE_SIZE": [10],
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+}
