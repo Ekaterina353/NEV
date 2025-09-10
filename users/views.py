@@ -76,10 +76,10 @@ class PaymentStatsView(generics.RetrieveAPIView):
 
     def get(self, request, *args, **kwargs):
         total = (
-            Payment.objects.filter(user=request.user).aggregate(
-                total_amount=Sum("amount")
-            )["total_amount"]
-            or 0
+                Payment.objects.filter(user=request.user).aggregate(
+                    total_amount=Sum("amount")
+                )["total_amount"]
+                or 0
         )
 
         by_method = (
