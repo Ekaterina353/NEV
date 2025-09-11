@@ -1,54 +1,47 @@
-
-from rest_framework.response import Response
-from rest_framework import status, generics, viewsets
+from rest_framework import generics, viewsets
+from rest_framework.permissions import IsAuthenticated
 from .models import Lesson, Course
-from .serializers import LessonSerializer,CourseSerializer
+from .permissions import IsOwnerOrModerator
+from .serializers import LessonSerializer, CourseSerializer
 
 
 class CourseViewSet(viewsets.ModelViewSet):
-    queryset = Course.objects.all()
     serializer_class = CourseSerializer
+    permission_classes = [IsAuthenticated]
+    queryset = Course.objects.none()
+
+    def get_permissions(self):
+        if self.action == "create":
+            self.permission_classes = [IsAuthenticated]
+        elif self.action in ["update", "partial_update", "retrieve"]:
+            self.permission_classes = [IsOwnerOrModerator]
+        elif self.action == "destroy":
+            self.permission_classes = [IsOwnerOrModerator]
+        return super().get_permissions()
+
+    def get_queryset(self):
+        return Course.objects.filter(owner=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
 
 
-
-class LessonListCreateView(generics.GenericAPIView):
-    queryset = Lesson.objects.all()
+class LessonListCreateView(generics.ListCreateAPIView):
     serializer_class = LessonSerializer
+    permission_classes = [IsAuthenticated]
+    queryset = Lesson.objects.none()
 
-    def get(self, request, *args, **kwargs):
-        lessons = self.get_queryset()
-        serializer = self.get_serializer(lessons, many=True)
-        return Response(serializer.data)
+    def get_queryset(self):
+        return Lesson.objects.filter(owner=self.request.user)
 
-    def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
 
 
-class LessonDetailView(generics.GenericAPIView):
-    queryset = Lesson.objects.all()
+class LessonDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = LessonSerializer
+    permission_classes = [IsAuthenticated, IsOwnerOrModerator]
+    queryset = Lesson.objects.none()
 
-    def get_object(self):
-        return super().get_object()
-
-    def get(self, request, *args, **kwargs):
-        lesson = self.get_object()
-        serializer = self.get_serializer(lesson)
-        return Response(serializer.data)
-
-    def put(self, request, *args, **kwargs):
-        lesson = self.get_object()
-        serializer = self.get_serializer(lesson, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request, *args, **kwargs):
-        lesson = self.get_object()
-        lesson.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    def get_queryset(self):
+        return Lesson.objects.filter(owner=self.request.user)

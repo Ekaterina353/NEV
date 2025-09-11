@@ -1,10 +1,7 @@
-
-import django.db.models.deletion
 from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = []
@@ -26,11 +23,16 @@ class Migration(migrations.Migration):
                 (
                     "preview",
                     models.ImageField(
-                        blank=True, null=True, upload_to="course_previews/"
+                        blank=True, null=True, upload_to="course_previews/",
+                        verbose_name="Превью",
                     ),
                 ),
-                ("description", models.TextField(blank=True, null=True)),
+                ("description", models.TextField(verbose_name="Описание")),
             ],
+            options={
+                "verbose_name": "Курс",
+                "verbose_name_plural": "Курсы",
+            },
         ),
         migrations.CreateModel(
             name="Lesson",
@@ -44,23 +46,20 @@ class Migration(migrations.Migration):
                         verbose_name="ID",
                     ),
                 ),
-                ("name", models.CharField(max_length=255)),
-                ("description", models.TextField(blank=True, null=True)),
+                ("name", models.CharField(max_length=255, verbose_name="Название")),
+                ("description", models.TextField(verbose_name="Описание")),
                 (
                     "preview",
                     models.ImageField(
-                        blank=True, null=True, upload_to="lesson_previews/"
+                        blank=True, null=True, upload_to="lesson_previews/",
+                        verbose_name="Превью",
                     ),
                 ),
-                ("video_url", models.URLField()),
-                (
-                    "course",
-                    models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE,
-                        related_name="lessons",
-                        to="materials.course",
-                    ),
-                ),
+                ("video_url", models.URLField(verbose_name="Ссылка на видео")),
             ],
+            options={
+                "verbose_name": "Урок",
+                "verbose_name_plural": "Уроки",
+            },
         ),
     ]
