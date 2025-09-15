@@ -9,6 +9,7 @@ class CourseViewSet(viewsets.ModelViewSet):
     serializer_class = CourseSerializer
     permission_classes = [IsAuthenticated]
     queryset = Course.objects.none()
+    pagination_class = CoursePagination
 
     def get_permissions(self):
         if self.action == "create":
@@ -30,12 +31,31 @@ class LessonListCreateView(generics.ListCreateAPIView):
     serializer_class = LessonSerializer
     permission_classes = [IsAuthenticated]
     queryset = Lesson.objects.none()
+    pagination_class = LessonPagination
 
     def get_queryset(self):
         return Lesson.objects.filter(owner=self.request.user)
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+
+
+class SubscriptionView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        course_id = request.data.get("course_id")
+        course = get_object_or_404(Course, id=course_id)
+
+        subscription = Subscription.objects.filter(user=user, course=course)
+
+        if subscription.exists():
+            subscription.delete()
+            return Response(status=204)  # No Content - подписка удалена
+        else:
+            Subscription.objects.create(user=user, course=course)
+            return Response(status=201)  # Created - подписка создана
 
 
 class LessonDetailView(generics.RetrieveUpdateDestroyAPIView):
