@@ -1,8 +1,13 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import generics, viewsets
 from rest_framework.permissions import IsAuthenticated
-from .models import Lesson, Course
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from .models import Lesson, Course, Subscription
+from .paginators import CoursePagination, LessonPagination
 from .permissions import IsOwnerOrModerator
-from .serializers import LessonSerializer, CourseSerializer
+from .serializers import LessonSerializer, CourseSerializer, SubscriptionSerializer
+
 
 
 class CourseViewSet(viewsets.ModelViewSet):

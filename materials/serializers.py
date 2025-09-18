@@ -1,5 +1,7 @@
 from rest_framework import serializers
-from .models import Course, Lesson
+from .models import Course, Lesson, Subscription
+from .validators import VideoURLValidator, validate_video_url
+
 
 
 class LessonSerializer(serializers.ModelSerializer):
