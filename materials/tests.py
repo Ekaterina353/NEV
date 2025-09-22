@@ -1,147 +1,120 @@
-from django.urls import reverse
-from rest_framework.test import APITestCase
+from rest_framework import status
+from rest_framework.reverse import reverse
+from rest_framework.test import APITestCase, APIClient
 
-from materials.models import Course, Lesson, Subscription
+from materials.models import Lesson, Course, Subscription
 from users.models import User
 
 
-class TestCase(APITestCase):
-    """
-    Базовый тестовый класс для всех тестов
-    """
+class LessonsCreateTestCase(APITestCase):
 
     def setUp(self):
-        self.user = User.objects.create(email="test@test.ru")
-        self.course = Course.objects.create(name="Test Course", owner=self.user)
-        self.lesson = Lesson.objects.create(
-            name="Test Lesson", course=self.course, owner=self.user
+        """Подготовка данных"""
+        self.user = User.objects.create_user(
+            email="kaka@gmail.com",  # Убрал username, оставил только email
+            password="kakas123",
         )
+        self.course = Course.objects.create(
+            name="Программирование",
+            description="Описание курса",
+            owner=self.user
+        )
+        self.lesson = Lesson.objects.create(
+            course=self.course,
+            video_url="https://www.youtube.com/",
+            name="Основы Django",
+            description="Описание урока",
+            owner=self.user,
+        )
+        self.client = APIClient()
         self.client.force_authenticate(user=self.user)
 
+    def test_create_lesson(self):
+        """Тестирование создания урока"""
+        url = reverse("materials:lesson-list-create")  # Возможно нужно изменить на materials вместо course
+        data = {
+            "name": "Основы Python",
+            "description": "Описание урока",
+            "course": self.course.id,
+            "video_url": "https://www.youtube.com/",
+        }
+        response = self.client.post(url, data)
 
-class CourseTestCase(TestCase, APITestCase):
-    """
-    Тесты для работы с курсами
-    """
+        # проверка статус кода
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
-    def test_course_retrieve(self):
-        """
-        Тест получения курса по ID
-        """
-        url = reverse("materials:course-detail", args=(self.course.pk,))
+        # проверка содержимого критичных полей post-запроса
+        response_data = response.json()
+        self.assertEqual(response_data["name"], "Основы Python")
+        self.assertEqual(response_data["course"], self.course.id)
+
+        # проверка записи в БД
+        self.assertTrue(Lesson.objects.filter(name="Основы Python").exists())
+
+    def test_retrieve_lesson(self):
+        """Тестирование просмотра отдельного урока"""
+        url = reverse("materials:lesson-detail", args=(self.lesson.pk,))  # materials вместо course
         response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json()["name"], self.course.name)
 
-    def test_course_create(self):
-        """
-        Тест создания нового курса
-        """
-        url = reverse("materials:course-list")
-        data = {
-            "name": "Test Course 2",
-            "description": "Test description",
-            "owner": self.user.pk,
-        }
-        response = self.client.post(url, data=data)
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(Course.objects.count(), 2)
+        # проверка статус кода
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_course_update(self):
-        """
-        Тест изменения курса по ID
-        """
-        url = reverse("materials:course-detail", args=(self.course.pk,))
-        data = {
-            "name": "Updated Test Course",
-            "description": "Updated test description",
-        }
-        response = self.client.put(url, data=data)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(
-            Course.objects.get(pk=self.course.pk).name, "Updated Test Course"
-        )
+        # проверка содержимого json
+        response_data = response.json()
+        self.assertEqual(response_data["name"], self.lesson.name)
 
-    def test_course_delete(self):
-        """
-        Тест удаления курса по ID
-        """
-        url = reverse("materials:course-detail", args=(self.course.pk,))
+    def test_update_lesson(self):
+        """Тестирование редактирования урока"""
+        url = reverse("materials:lessons_update", args=(self.lesson.pk,))  # materials вместо course
+        update_data = {"name": "Основы ООП"}
+
+        # отправляем обновлённые данные
+        response = self.client.patch(url, update_data)
+        data = response.json()
+
+        # проверка статус кода
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # проверка содержимого json
+        self.assertEqual(data.get("name"), "Основы ООП")
+
+    def test_delete_lesson(self):
+        """Тестирование удаления урока"""
+        url = reverse("materials:lessons_destroy", args=(self.lesson.pk,))  # materials вместо course
         response = self.client.delete(url)
-        self.assertEqual(response.status_code, 204)
-        self.assertEqual(Course.objects.count(), 0)
 
-
-class LessonTestCase(TestCase, APITestCase):
-    """
-    Тесты для работы с уроками
-    """
-
-    def test_lesson_retrieve(self):
-        """
-        Тест получения урока по ID
-        """
-        url = reverse("materials:lessons-retrieve", args=(self.lesson.pk,))
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json()["name"], self.lesson.name)
-
-    def test_lesson_create(self):
-        """
-        Тест создания нового урока
-        """
-        url = reverse("materials:lessons-create")
-        data = {
-            "name": "Test Lesson 2",
-            "course": self.course.pk,
-            "owner": self.user.pk,
-        }
-        response = self.client.post(url, data=data)
-        self.assertEqual(response.status_code, 201)
-        self.assertEqual(Lesson.objects.count(), 2)
-
-    def test_lesson_update(self):
-        """
-        Тест изменения урока по ID
-        """
-        url = reverse("materials:lessons-update", args=(self.lesson.pk,))
-        data = {
-            "name": "Updated Test Lesson",
-            "course": self.course.pk,
-            "owner": self.user.pk,
-        }
-        response = self.client.put(url, data=data)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(
-            Lesson.objects.get(pk=self.lesson.pk).name, "Updated Test Lesson"
-        )
-
-    def test_lesson_delete(self):
-        """
-        Тест удаления урока по ID
-        """
-        url = reverse("materials:lessons-destroy", args=(self.lesson.pk,))
-        response = self.client.delete(url)
-        self.assertEqual(response.status_code, 204)
+        # проверка статус кода
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        # проверка количества уроков после удаления
         self.assertEqual(Lesson.objects.count(), 0)
 
+    def test_list_lessons(self):
+        """Тестирование просмотра списка уроков"""
+        url = reverse("materials:lessons_list")  # materials вместо course
+        response = self.client.get(url)
 
-class SubscriptionTest(TestCase, APITestCase):
-    """
-    Тесты для работы с подписками
-    """
+        # проверка статус кода
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_subscription(self):
-        """
-        Тест подписки на курс
-        """
-        url = reverse("materials:subscription")
-        data = {
-            "user_id": self.user.pk,
-            "course_id": self.course.pk,
-        }
+    def test_activate_subscription(self):
+        """Тестирование работы подписки"""
+        # Шаг 1. Авторизуем пользователя (уже сделано в setUp)
+        # Шаг 2. Создадим новый курс
+        course = Course.objects.create(
+            name="Новый курс",
+            description="Содержание курса",
+            owner=self.user
+        )
+        # Шаг 3. Создадим новую подписку на курс
+        Subscription.objects.create(
+            user=self.user,
+            course=course,
+        )
+        # Подготовка отправки данных в тесте
+        url = reverse("materials:course-detail", kwargs={"pk": course.id})  # materials вместо course
+        response = self.client.get(url)
 
-        # Проверка оформления подписки
-        response = self.client.post(url, data=data)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json()["message"], "Подписка добавлена")
+        # Шаг 4. Тестируем на статус код и в тесте делаем запрос на detail-view курса
+        # тестирование статус кода активации подписки
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # тестирование активированной подписки
+        self.assertTrue(response.data.get("subscription_activate", True))

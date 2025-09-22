@@ -70,3 +70,45 @@ class LessonDetailView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         return Lesson.objects.filter(owner=self.request.user)
+
+
+class LessonAPIView(generics.ListAPIView):
+    """Просмотр списка уроков"""
+
+    queryset = Lesson.objects.all()
+    serializer_class = LessonSerializer
+    permission_classes = [IsAuthenticated]
+    pagination_class = LessonPagination
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        if not self.request.user.groups.filter(
+            name="moders"
+        ).exists():  # если не входит в группу модеров
+            return queryset.filter(
+                owner=self.request.user
+            )  # показать для владельцев только их объекты
+        return queryset  # А, если входит, то весь список
+
+
+class LessonAPIUpdate(generics.UpdateAPIView):
+    """Редактирование урока"""
+
+    queryset = Lesson.objects.all()
+    serializer_class = LessonSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_update(self, serializer):
+        lesson = serializer.save(owner=self.request.user)
+        lesson.user = self.request.user
+        lesson.save()
+
+
+class LessonAPIDestroy(generics.DestroyAPIView):
+    """Удаление урока"""
+
+    queryset = Lesson.objects.all()
+    permission_classes = [IsAuthenticated]
+
+    def perform_destroy(self, instance):
+        instance.delete()
