@@ -1,4 +1,7 @@
 from django.shortcuts import get_object_or_404
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import (OpenApiExample, OpenApiParameter,
+                                   extend_schema, extend_schema_view)
 from rest_framework import generics, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -9,7 +12,32 @@ from .permissions import IsOwnerOrModerator
 from .serializers import LessonSerializer, CourseSerializer, SubscriptionSerializer
 
 
-
+@extend_schema_view(
+    list=extend_schema(
+        summary="Список курсов",
+        description="Получить список всех курсов пользователя",
+        tags=["Курсы"],
+    ),
+    create=extend_schema(
+        summary="Создать курс", description="Создать новый курс", tags=["Курсы"]
+    ),
+    retrieve=extend_schema(
+        summary="Получить курс",
+        description="Получить детальную информацию о курсе",
+        tags=["Курсы"],
+    ),
+    update=extend_schema(
+        summary="Обновить курс", description="Полностью обновить курс", tags=["Курсы"]
+    ),
+    partial_update=extend_schema(
+        summary="Частично обновить курс",
+        description="Частично обновить курс",
+        tags=["Курсы"],
+    ),
+    destroy=extend_schema(
+        summary="Удалить курс", description="Удалить курс", tags=["Курсы"]
+    ),
+)
 class CourseViewSet(viewsets.ModelViewSet):
     serializer_class = CourseSerializer
     permission_classes = [IsAuthenticated]
@@ -32,6 +60,16 @@ class CourseViewSet(viewsets.ModelViewSet):
         serializer.save(owner=self.request.user)
 
 
+@extend_schema_view(
+    get=extend_schema(
+        summary="Список уроков",
+        description="Получить список всех уроков пользователя",
+        tags=["Уроки"],
+    ),
+    post=extend_schema(
+        summary="Создать урок", description="Создать новый урок", tags=["Уроки"]
+    ),
+)
 class LessonListCreateView(generics.ListCreateAPIView):
     serializer_class = LessonSerializer
     permission_classes = [IsAuthenticated]
@@ -45,6 +83,31 @@ class LessonListCreateView(generics.ListCreateAPIView):
         serializer.save(owner=self.request.user)
 
 
+@extend_schema(
+    summary="Управление подпиской",
+    description="Добавить или удалить подписку на курс. Если подписка существует - удаляет её (204), если нет - создает новую (201)",
+    tags=["Подписки"],
+    request={
+        "application/json": {
+            "type": "object",
+            "properties": {
+                "course_id": {"type": "integer", "description": "ID курса для подписки"}
+            },
+            "required": ["course_id"],
+        }
+    },
+    responses={
+        201: {"description": "Подписка создана", "type": "object", "properties": {}},
+        204: {"description": "Подписка удалена", "type": "object", "properties": {}},
+    },
+    examples=[
+        OpenApiExample(
+            "Добавить подписку",
+            value={"course_id": 1},
+            description="Пример запроса для добавления подписки на курс с ID 1",
+        )
+    ],
+)
 class SubscriptionView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -63,6 +126,24 @@ class SubscriptionView(APIView):
             return Response(status=201)  # Created - подписка создана
 
 
+@extend_schema_view(
+    get=extend_schema(
+        summary="Получить урок",
+        description="Получить детальную информацию об уроке",
+        tags=["Уроки"],
+    ),
+    put=extend_schema(
+        summary="Обновить урок", description="Полностью обновить урок", tags=["Уроки"]
+    ),
+    patch=extend_schema(
+        summary="Частично обновить урок",
+        description="Частично обновить урок",
+        tags=["Уроки"],
+    ),
+    delete=extend_schema(
+        summary="Удалить урок", description="Удалить урок", tags=["Уроки"]
+    ),
+)
 class LessonDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = LessonSerializer
     permission_classes = [IsAuthenticated, IsOwnerOrModerator]
@@ -70,6 +151,7 @@ class LessonDetailView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         return Lesson.objects.filter(owner=self.request.user)
+
 
 
 class LessonAPIView(generics.ListAPIView):
@@ -82,12 +164,8 @@ class LessonAPIView(generics.ListAPIView):
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        if not self.request.user.groups.filter(
-            name="moders"
-        ).exists():  # если не входит в группу модеров
-            return queryset.filter(
-                owner=self.request.user
-            )  # показать для владельцев только их объекты
+        if not self.request.user.groups.filter(name="moders").exists():  # если не входит в группу модеров
+            return queryset.filter(owner=self.request.user)  # показать для владельцев только их объекты
         return queryset  # А, если входит, то весь список
 
 

@@ -9,9 +9,13 @@ from rest_framework.response import Response
 from .filters import PaymentFilter
 from .models import Payment
 from .permissions import IsProfileOwner
-from .serializers import (PaymentSerializer, PrivateProfileSerializer,
-                          PublicProfileSerializer,
-                          UserProfileWithPaymentsSerializer, UserSerializer)
+from .serializers import (
+    PaymentSerializer,
+    PrivateProfileSerializer,
+    PublicProfileSerializer,
+    UserProfileWithPaymentsSerializer,
+    UserSerializer,
+)
 
 User = get_user_model()
 
@@ -54,9 +58,9 @@ class OwnProfileUpdateView(generics.RetrieveUpdateAPIView):
         return self.request.user
 
     def get_queryset(self):
-        return User.objects.prefetch_related(
-            "payments", "payments__course", "payments__lesson"
-        ).filter(pk=self.request.user.pk)
+        return User.objects.prefetch_related("payments", "payments__course", "payments__lesson").filter(
+            pk=self.request.user.pk
+        )
 
 
 class PaymentHistoryView(generics.ListAPIView):
@@ -75,12 +79,7 @@ class PaymentStatsView(generics.RetrieveAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
-        total = (
-                Payment.objects.filter(user=request.user).aggregate(
-                    total_amount=Sum("amount")
-                )["total_amount"]
-                or 0
-        )
+        total = Payment.objects.filter(user=request.user).aggregate(total_amount=Sum("amount"))["total_amount"] or 0
 
         by_method = (
             Payment.objects.filter(user=request.user)

@@ -3,16 +3,18 @@ from .models import Course, Lesson, Subscription
 from .validators import VideoURLValidator, validate_video_url
 
 
-
 class LessonSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lesson
-        fields = ["id", "name", "description",
-                  "preview",
-                  "video_url",
-                  "course",
-                  "owner",
-                  ]
+        fields = [
+            "id",
+            "name",
+            "description",
+            "preview",
+            "video_url",
+            "course",
+            "owner",
+        ]
         read_only_fields = ["owner"]
         validators = [VideoURLValidator(field="video_url")]
 
