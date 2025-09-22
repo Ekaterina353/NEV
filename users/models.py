@@ -36,13 +36,9 @@ class UserManager(BaseUserManager):
 class User(AbstractUser):
     username = None
     email = models.EmailField(_("email address"), unique=True)
-    phone = models.CharField(
-        max_length=15, blank=True, null=True, verbose_name="Телефон"
-    )
+    phone = models.CharField(max_length=15, blank=True, null=True, verbose_name="Телефон")
     city = models.CharField(max_length=100, blank=True, null=True, verbose_name="Город")
-    avatar = models.ImageField(
-        upload_to="avatars/", blank=True, null=True, verbose_name="Аватар"
-    )
+    avatar = models.ImageField(upload_to="avatars/", blank=True, null=True, verbose_name="Аватар")
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
@@ -85,9 +81,7 @@ class Payment(models.Model):
         blank=True,
         verbose_name="Оплаченный урок",
     )
-    amount = models.DecimalField(
-        max_digits=10, decimal_places=2, verbose_name="Сумма оплаты"
-    )
+    amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Сумма оплаты")
     payment_method = models.CharField(
         max_length=20,
         choices=PAYMENT_METHODS,

@@ -14,11 +14,7 @@ class LessonsCreateTestCase(APITestCase):
             email="kaka@gmail.com",  # Убрал username, оставил только email
             password="kakas123",
         )
-        self.course = Course.objects.create(
-            name="Программирование",
-            description="Описание курса",
-            owner=self.user
-        )
+        self.course = Course.objects.create(name="Программирование", description="Описание курса", owner=self.user)
         self.lesson = Lesson.objects.create(
             course=self.course,
             video_url="https://www.youtube.com/",
@@ -99,11 +95,7 @@ class LessonsCreateTestCase(APITestCase):
         """Тестирование работы подписки"""
         # Шаг 1. Авторизуем пользователя (уже сделано в setUp)
         # Шаг 2. Создадим новый курс
-        course = Course.objects.create(
-            name="Новый курс",
-            description="Содержание курса",
-            owner=self.user
-        )
+        course = Course.objects.create(name="Новый курс", description="Содержание курса", owner=self.user)
         # Шаг 3. Создадим новую подписку на курс
         Subscription.objects.create(
             user=self.user,

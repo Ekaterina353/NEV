@@ -15,11 +15,7 @@ def validate_video_url(value):
     domain = parsed_url.netloc.lower()
 
     # Разрешаем только youtube.com и его поддомены
-    if not (
-        domain == "youtube.com"
-        or domain == "www.youtube.com"
-        or domain.endswith(".youtube.com")
-    ):
+    if not (domain == "youtube.com" or domain == "www.youtube.com" or domain.endswith(".youtube.com")):
         raise ValidationError(
             "Разрешены только ссылки на YouTube. Ссылки на сторонние образовательные платформы или личные сайты запрещены."
         )
