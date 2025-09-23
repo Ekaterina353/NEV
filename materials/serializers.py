@@ -2,7 +2,6 @@ from rest_framework import serializers
 from .models import Course, Lesson, Subscription, Payment
 from .validators import VideoURLValidator
 
-
 class LessonSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lesson

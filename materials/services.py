@@ -43,28 +43,3 @@ def create_stripe_session(stripe_price_id):
     )
     return session.id, session.url
 
-
-def create_stripe_payment_intent(amount):
-    """
-    Создает Payment Intent в Stripe.
-
-    Args:
-        amount (int): Сумма платежа в наименьших единицах валюты (например, центы для USD).
-
-    Returns:
-        stripe.PaymentIntent: Объект PaymentIntent, созданный в Stripe.
-
-    Raises:
-        stripe.error.StripeError: В случае ошибки при создании PaymentIntent в Stripe.
-    """
-    try:
-        intent = stripe.PaymentIntent.create(
-            amount=amount,
-            currency='rub',  # Или другая валюта
-            automatic_payment_methods={
-                'enabled': True,
-            },
-        )
-        return intent
-    except stripe.error.StripeError as e:
-        raise e
