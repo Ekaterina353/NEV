@@ -104,17 +104,14 @@ class LessonsCreateTestCase(APITestCase):
             description="Содержание курса",
             owner=self.user
         )
-        # Шаг 3. Создадим новую подписку на курс
-        Subscription.objects.create(
-            user=self.user,
-            course=course,
-        )
-        # Подготовка отправки данных в тесте
-        url = reverse("materials:course-detail", kwargs={"pk": course.id})  # materials вместо course
-        response = self.client.get(url)
 
-        # Шаг 4. Тестируем на статус код и в тесте делаем запрос на detail-view курса
-        # тестирование статус кода активации подписки
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        # тестирование активированной подписки
-        self.assertTrue(response.data.get("subscription_activate", True))
+        # Отправляем запрос на URL подписки
+        url = reverse("materials:subscription")
+        data = {'course_id': self.course.id}  # Передаем ID курса
+        response = self.client.post(url, data)  # Используем POST
+
+        # Проверяем статус код и наличие ключа subscription_activate
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # Проверяем, что подписка была создана
+        self.assertTrue(Subscription.objects.filter(user=self.user, course=self.course).exists())
