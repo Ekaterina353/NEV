@@ -3,6 +3,7 @@ import os
 import dotenv
 from datetime import timedelta
 from celery.schedules import crontab
+from django.conf.global_settings import SERVER_EMAIL
 
 dotenv.load_dotenv()
 
@@ -27,6 +28,7 @@ INSTALLED_APPS = [
     "django_filters",
     "rest_framework_simplejwt",
     "drf_yasg",
+    "django-celery-beat",
 ]
 
 MIDDLEWARE = [
@@ -174,10 +176,11 @@ CELERY_BEAT_SCHEDULE = {
 
 # Email settings
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.yandex.ru')
-EMAIL_PORT = int(os.getenv('EMAIL_PORT', 465))
-EMAIL_USE_TLS = os.getenv('EMAIL_PORT', '465') == '587'  # TLS только для порта 587
-EMAIL_USE_SSL = os.getenv('EMAIL_PORT', '465') == '465'  # SSL для порта 465
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
-DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@yandex.ru')
+EMAIL_HOST = os.getenv('EMAIL_HOST')
+EMAIL_PORT = os.getenv('EMAIL_PORT')
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = True
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
