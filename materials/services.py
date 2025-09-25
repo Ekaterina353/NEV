@@ -1,5 +1,8 @@
 import stripe
 from config.settings import STRIPE_API_KEY
+from rest_framework import generics
+from rest_framework import serializers
+
 
 stripe.api_key = STRIPE_API_KEY
 
@@ -43,3 +46,36 @@ def create_stripe_session(stripe_price_id):
     )
     return session.id, session.url
 
+class PaymentListView(generics.CreateAPIView):
+    serializer_class = serializers.Serializer  # Укажите актуальный сериализатор
+
+    def perform_create(self, serializer):
+        # Сохраняем платеж
+        payment = serializer.save()
+
+        # Предполагаем, что в payment есть поле content, которое содержит Product/Course
+        content = payment.content
+
+        # Создание stripe product
+        stripe_product_id = create_stripe_product(content)
+
+        if not stripe_product_id:
+            raise serializers.ValidationError("Ошибка при создании Stripe Product")
+
+        # Создание stripe price
+        stripe_price = create_stripe_price(content)
+
+        if not stripe_price:
+            raise serializers.ValidationError("Ошибка при создании Stripe Price")
+
+
+        payment.stripe_price_id = stripe_price.id
+        payment.save()
+
+        # Создание stripe session
+        session_id, session_url = create_stripe_session(stripe_price.id)
+
+        # Обновляем модель Payment с session_id и session_url
+        payment.session_id = session_id
+        payment.session_url = session_url
+        payment.save()
