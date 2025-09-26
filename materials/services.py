@@ -1,5 +1,7 @@
 import stripe
 from config.settings import STRIPE_API_KEY
+from rest_framework import generics
+from rest_framework import serializers
 
 stripe.api_key = STRIPE_API_KEY
 
@@ -42,4 +44,3 @@ def create_stripe_session(stripe_price_id):
         mode="payment"
     )
     return session.id, session.url
-
