@@ -12,6 +12,10 @@ Django = "^5.2.3"
 djangorestframework = "^3.16.0"
 python-dotenv = "^1.1.0"
 pillow = "^11.2.1"
+coverage = "^7.8.0"
+drf-spectacular = "^0.28.0"
+stripe = "^12.0.0"
+drf-yasg = "^1.21.8"
 
 
 

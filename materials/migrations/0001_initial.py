@@ -23,7 +23,9 @@ class Migration(migrations.Migration):
                 (
                     "preview",
                     models.ImageField(
-                        blank=True, null=True, upload_to="course_previews/",
+                        blank=True,
+                        null=True,
+                        upload_to="course_previews/",
                         verbose_name="Превью",
                     ),
                 ),
@@ -51,7 +53,9 @@ class Migration(migrations.Migration):
                 (
                     "preview",
                     models.ImageField(
-                        blank=True, null=True, upload_to="lesson_previews/",
+                        blank=True,
+                        null=True,
+                        upload_to="lesson_previews/",
                         verbose_name="Превью",
                     ),
                 ),
