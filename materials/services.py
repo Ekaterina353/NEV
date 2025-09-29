@@ -1,7 +1,7 @@
 import stripe
 from config.settings import STRIPE_API_KEY
-from rest_framework import generics
-from rest_framework import serializers
+
+
 
 stripe.api_key = STRIPE_API_KEY
 
@@ -9,23 +9,21 @@ stripe.api_key = STRIPE_API_KEY
 def create_stripe_product(content_object):
     try:
         product = stripe.Product.create(
-            name=content_object.title,
+            name=content_object.name,
             type='service'
         )
-        content_object.stripe_product_id = product.id
-        content_object.save()
         return product.id
     except stripe.error.StripeError as e:
         print(f'Ошибка создания продукта: {e}')
         return None
 
 
-def create_stripe_price(content):
+def create_stripe_price(product_id, price):
     try:
         stripe_price = stripe.Price.create(
             currency='rub',
-            unit_amount=content.price * 100,
-            product=content.stripe_product_id,
+            unit_amount=int(price * 100),
+            product=product_id,
         )
         return stripe_price
     except stripe.error.StripeError as e:
