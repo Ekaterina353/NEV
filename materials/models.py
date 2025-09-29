@@ -1,6 +1,6 @@
+from django.db import models
 from django.conf import \
     settings  # Используем settings для ссылки на модель пользователя
-from django.db import models
 
 
 class Course(models.Model):
@@ -24,11 +24,11 @@ class Course(models.Model):
     class Meta:
         verbose_name = "Курс"
         verbose_name_plural = "Курсы"
-        ordering = ["name"]
+       # ordering = ["name", "description"]
 
 
 class Lesson(models.Model):
-    name = models.CharField(max_length=255, verbose_name="Название")
+    name = models.CharField(max_length=255)
     description = models.TextField(verbose_name="Описание")
     preview = models.ImageField(
         upload_to="lesson_previews/", null=True, blank=True, verbose_name="Превью"
@@ -50,7 +50,7 @@ class Lesson(models.Model):
     class Meta:
         verbose_name = "Урок"
         verbose_name_plural = "Уроки"
-        ordering = ["name"]
+       # ordering = ["name"]
 
 
 class Subscription(models.Model):

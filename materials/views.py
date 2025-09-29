@@ -1,6 +1,5 @@
-from datetime import timedelta
-
 from django.shortcuts import get_object_or_404
+
 from django.utils import timezone
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import (OpenApiExample, OpenApiParameter,
@@ -9,12 +8,12 @@ from rest_framework import generics, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
-from .models import Course, Lesson, Subscription
+from .models import Lesson, Course, Subscription
 from .paginators import CoursePagination, LessonPagination
 from .permissions import IsOwnerOrModerator
-from .serializers import (CourseSerializer, LessonSerializer,
-                          SubscriptionSerializer)
+from .serializers import LessonSerializer, CourseSerializer, SubscriptionSerializer
+
+from datetime import timedelta
 from .tasks import send_course_update_email
 
 
@@ -114,7 +113,6 @@ class LessonListCreateView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
-
 @extend_schema(
     summary="Управление подпиской",
     description="Добавить или удалить подписку на курс. Если подписка существует - удаляет её (204), если нет - создает новую (201)",
@@ -156,7 +154,6 @@ class SubscriptionView(APIView):
         else:
             Subscription.objects.create(user=user, course=course)
             return Response(status=201)  # Created - подписка создана
-
 
 @extend_schema_view(
     get=extend_schema(
@@ -211,3 +208,45 @@ class LessonDetailView(generics.RetrieveUpdateDestroyAPIView):
                     sub.user.email, course.name, material_title
                 )
         return response
+
+
+class LessonAPIView(generics.ListAPIView):
+    """Просмотр списка уроков"""
+
+    queryset = Lesson.objects.all()
+    serializer_class = LessonSerializer
+    permission_classes = [IsAuthenticated]
+    pagination_class = LessonPagination
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        if not self.request.user.groups.filter(
+            name="moders"
+        ).exists():  # если не входит в группу модеров
+            return queryset.filter(
+                owner=self.request.user
+            )  # показать для владельцев только их объекты
+        return queryset  # А, если входит, то весь список
+
+
+class LessonAPIUpdate(generics.UpdateAPIView):
+    """Редактирование урока"""
+
+    queryset = Lesson.objects.all()
+    serializer_class = LessonSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_update(self, serializer):
+        lesson = serializer.save(owner=self.request.user)
+        lesson.user = self.request.user
+        lesson.save()
+
+
+class LessonAPIDestroy(generics.DestroyAPIView):
+    """Удаление урока"""
+
+    queryset = Lesson.objects.all()
+    permission_classes = [IsAuthenticated]
+
+    def perform_destroy(self, instance):
+        instance.delete()

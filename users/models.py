@@ -36,13 +36,9 @@ class UserManager(BaseUserManager):
 class User(AbstractUser):
     username = None
     email = models.EmailField(_("email address"), unique=True)
-    phone = models.CharField(
-        max_length=15, blank=True, null=True, verbose_name="Телефон"
-    )
+    phone = models.CharField(max_length=15, blank=True, null=True, verbose_name="Телефон")
     city = models.CharField(max_length=100, blank=True, null=True, verbose_name="Город")
-    avatar = models.ImageField(
-        upload_to="avatars/", blank=True, null=True, verbose_name="Аватар"
-    )
+    avatar = models.ImageField(upload_to="avatars/", blank=True, null=True, verbose_name="Аватар")
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
@@ -62,14 +58,6 @@ class Payment(models.Model):
     PAYMENT_METHODS = [
         ("cash", "Наличные"),
         ("transfer", "Перевод на счет"),
-        ("stripe", "Stripe"),
-    ]
-
-    PAYMENT_STATUSES = [
-        ("pending", "Ожидает оплаты"),
-        ("paid", "Оплачен"),
-        ("failed", "Ошибка оплаты"),
-        ("cancelled", "Отменен"),
     ]
 
     user = models.ForeignKey(
@@ -93,33 +81,12 @@ class Payment(models.Model):
         blank=True,
         verbose_name="Оплаченный урок",
     )
-    amount = models.DecimalField(
-        max_digits=10, decimal_places=2, verbose_name="Сумма оплаты"
-    )
+    amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Сумма оплаты")
     payment_method = models.CharField(
         max_length=20,
         choices=PAYMENT_METHODS,
         verbose_name="Способ оплаты",
-        default="cash",
-    )
-    payment_status = models.CharField(
-        max_length=20,
-        choices=PAYMENT_STATUSES,
-        verbose_name="Статус платежа",
-        default="pending",
-    )
-    # Stripe fields
-    stripe_product_id = models.CharField(
-        max_length=255, blank=True, null=True, verbose_name="ID продукта в Stripe"
-    )
-    stripe_price_id = models.CharField(
-        max_length=255, blank=True, null=True, verbose_name="ID цены в Stripe"
-    )
-    stripe_session_id = models.CharField(
-        max_length=255, blank=True, null=True, verbose_name="ID сессии в Stripe"
-    )
-    stripe_payment_intent_id = models.CharField(
-        max_length=255, blank=True, null=True, verbose_name="ID платежа в Stripe"
+        default="cash",  # Добавляем значение по умолчанию
     )
 
     def __str__(self):

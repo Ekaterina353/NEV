@@ -1,9 +1,9 @@
-import os
-from datetime import timedelta
 from pathlib import Path
-
+import os
 import dotenv
-from celery import crontab
+from datetime import timedelta
+from celery.schedules import crontab
+from django.conf.global_settings import SERVER_EMAIL
 
 dotenv.load_dotenv()
 
@@ -14,7 +14,6 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -28,8 +27,8 @@ INSTALLED_APPS = [
     "materials",
     "django_filters",
     "rest_framework_simplejwt",
-    "drf_spectacular",
-    "django_celery_beat",
+    "drf_yasg",
+    "django-celery-beat",
 ]
 
 MIDDLEWARE = [
@@ -62,7 +61,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -73,7 +71,6 @@ DATABASES = {
         "PORT": os.getenv("PORT"),
     }
 }
-
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -90,7 +87,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 LANGUAGE_CODE = "en-us"
 
 TIME_ZONE = "Europe/Moscow"
@@ -99,16 +95,13 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 STATIC_URL = "static/"
 
-# Медиатека (Media)
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10 MB
 FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024  # 5 MB
-
 
 # Для корректного отображения кириллицы в фикстурах
 DEFAULT_CHARSET = "utf-8"
@@ -134,8 +127,7 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
 }
 
-# Stripe settings
-STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "sk_test_...")
+STRIPE_API_KEY = os.getenv("STRIPE_API_KEY", "sk_test_...")
 STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY", "pk_test_...")
 
 # DRF Spectacular settings
@@ -184,10 +176,11 @@ CELERY_BEAT_SCHEDULE = {
 
 # Email settings
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.yandex.ru')
-EMAIL_PORT = int(os.getenv('EMAIL_PORT', 465))
-EMAIL_USE_TLS = os.getenv('EMAIL_PORT', '465') == '587'  # TLS только для порта 587
-EMAIL_USE_SSL = os.getenv('EMAIL_PORT', '465') == '465'  # SSL для порта 465
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
-DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@yandex.ru')
+EMAIL_HOST = os.getenv('EMAIL_HOST')
+EMAIL_PORT = os.getenv('EMAIL_PORT')
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = True
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

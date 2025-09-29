@@ -26,7 +26,6 @@ class PaymentSerializer(serializers.ModelSerializer):
     course_title = serializers.SerializerMethodField()
     lesson_title = serializers.SerializerMethodField()
     payment_method_display = serializers.SerializerMethodField()
-    payment_status_display = serializers.SerializerMethodField()
 
     class Meta:
         model = Payment
@@ -36,18 +35,15 @@ class PaymentSerializer(serializers.ModelSerializer):
             "amount",
             "payment_method",
             "payment_method_display",
-            "payment_status",
-            "payment_status_display",
             "course",
             "course_title",
             "lesson",
             "lesson_title",
-            "stripe_session_id",
+            "user",
         ]
         extra_kwargs = {
             "course": {"write_only": True},
             "lesson": {"write_only": True},
-            "stripe_session_id": {"read_only": True},
         }
 
     def get_course_title(self, obj):
@@ -58,9 +54,6 @@ class PaymentSerializer(serializers.ModelSerializer):
 
     def get_payment_method_display(self, obj):
         return obj.get_payment_method_display()
-
-    def get_payment_status_display(self, obj):
-        return obj.get_payment_status_display()
 
 
 class PublicProfileSerializer(serializers.ModelSerializer):

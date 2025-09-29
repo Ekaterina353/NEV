@@ -1,16 +1,22 @@
 [tool.poetry]
-name = "djangorestframework"
+name = "Project_REST"
 version = "0.1.0"
 description = ""
-authors = ["oksanafedorova07 <kcenka4@gmail.com>"]
+authors = ["katja <gorbunovakatja530@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.13"
 django-perms = "^2.1.0"
-stripe = "^12.3.0"
-pillow = "^11.3.0"
-django = "^5.2.5"
+Django = "^5.2.3"
+djangorestframework = "^3.16.0"
+python-dotenv = "^1.1.0"
+pillow = "^11.2.1"
+coverage = "^7.8.0"
+drf-spectacular = "^0.28.0"
+stripe = "^12.0.0"
+drf-yasg = "^1.21.8"
+
 
 
 [tool.poetry.group.lint.dependencies]
@@ -21,7 +27,14 @@ isort = "^6.0.1"
 
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^8.4.1"
+pytest = "^8.4.2"
+
+[tool.black]
+line-length = 119
+exclude = '.git'
+
+[tool.isort]
+line_length = 119
 
 [build-system]
 requires = ["poetry-core"]
