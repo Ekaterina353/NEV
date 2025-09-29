@@ -1,3 +1,4 @@
+from materials.services import create_stripe_product, create_stripe_price, create_stripe_session
 import stripe
 from django.contrib.auth import get_user_model
 from django.db.models import Count, Sum
@@ -8,12 +9,13 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from config import settings
+
 from .filters import PaymentFilter
 from .models import Payment
 from .permissions import IsProfileOwner
 from .serializers import (
     PaymentSerializer,
-    PrivateProfileSerializer,
+    # PrivateProfileSerializer,
     PublicProfileSerializer,
     UserProfileWithPaymentsSerializer,
     UserSerializer,
@@ -21,6 +23,7 @@ from .serializers import (
 
 User = get_user_model()
 stripe.api_key = settings.STRIPE_API_KEY
+
 
 class PaymentListView(generics.ListCreateAPIView):
     serializer_class = PaymentSerializer
@@ -33,36 +36,16 @@ class PaymentListView(generics.ListCreateAPIView):
     def get_queryset(self):
         return Payment.objects.filter(user=self.request.user)
 
-
-    def create(self, request, *args, **kwargs):
+    def perform_create(self, serializer):
         """
-        Создает платеж через Stripe.
+        Создает платеж через Stripe используя Stripe Product, Price и Session.
         """
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        try:
-            # Создаем платеж в Stripe
-            charge = stripe.Charge.create(
-                amount=int(serializer.validated_data['amount'] * 100),  # Сумма в центах
-                currency='usd',  # Валюта
-                source=request.data['stripe_token'],  # Токен карты, полученный от Stripe.js
-                description=f"Payment for user {request.user.email}"
-            )
-
-            # Если платеж в Stripe успешен, сохраняем информацию о платеже в базу данных
-            if charge.status == 'succeeded':
-                serializer.save(user=request.user, payment_id=charge.id) # Сохраняем id платежа stripe
-                return Response(serializer.data, status=201)
-            else:
-                return Response({'error': 'Payment failed'}, status=400)
-
-        except stripe.error.CardError as e:
-            # Обрабатываем ошибки карт Stripe
-            return Response({'error': str(e)}, status=400)
-        except Exception as e:
-            # Обрабатываем другие ошибки
-            return Response({'error': 'Something went wrong'}, status=500)
+        payment = serializer.save(user=self.request.user)  # Сохраняем пользователя
+        product_id = create_stripe_product(payment.course)
+        price = create_stripe_price(product_id, payment.amount)
+        session = create_stripe_session(price["id"])
+        payment.payment_id = session.id  # Сохраняем id сессии
+        payment.save()
 
 
 class UserViewSet(viewsets.ModelViewSet):
