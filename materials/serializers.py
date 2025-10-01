@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from .models import Course, Lesson, Subscription
+
 from users.models import Payment
+
 from .validators import VideoURLValidator
 
 class LessonSerializer(serializers.ModelSerializer):
@@ -52,9 +54,8 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         read_only_fields = ["user", "created_at"]
 
 
-class PaymentSerializer(serializers.ModelSerializer):
-    course = serializers.PrimaryKeyRelatedField(queryset=Course.objects.all())
-
+class SubscriptionSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Payment
-        fields = 'course'
+        model = Subscription
+        fields = ["id", "user", "course", "created_at"]
+        read_only_fields = ["user", "created_at"]
