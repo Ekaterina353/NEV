@@ -60,6 +60,10 @@ class Payment(models.Model):
         ("transfer", "Перевод на счет"),
     ]
 
+    payment_id = models.CharField(max_length=255, null=True, blank=True)
+    payment_url = models.TextField(null=True, blank=True)
+
+
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
