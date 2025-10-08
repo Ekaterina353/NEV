@@ -1,7 +1,8 @@
-from pathlib import Path
 import os
-import dotenv
 from datetime import timedelta
+from pathlib import Path
+
+import dotenv
 
 dotenv.load_dotenv()
 
@@ -116,7 +117,7 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.IsAuthenticated",
     ],
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
-"PAGE_SIZE": 10,
+    "PAGE_SIZE": 10,
 }
 
 SIMPLE_JWT = {

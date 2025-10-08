@@ -38,9 +38,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="payment",
             name="stripe_price_id",
-            field=models.CharField(
-                blank=True, max_length=255, null=True, verbose_name="ID цены в Stripe"
-            ),
+            field=models.CharField(blank=True, max_length=255, null=True, verbose_name="ID цены в Stripe"),
         ),
         migrations.AddField(
             model_name="payment",
@@ -55,9 +53,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="payment",
             name="stripe_session_id",
-            field=models.CharField(
-                blank=True, max_length=255, null=True, verbose_name="ID сессии в Stripe"
-            ),
+            field=models.CharField(blank=True, max_length=255, null=True, verbose_name="ID сессии в Stripe"),
         ),
         migrations.AlterField(
             model_name="payment",
