@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 from .models import Course, Lesson, Subscription
 from .paginators import CoursePagination, LessonPagination
 from .permissions import IsOwnerOrModerator
-from .serializers import CourseSerializer, LessonSerializer, SubscriptionSerializer
+from .serializers import CourseSerializer, LessonSerializer
 
 
 class CourseViewSet(viewsets.ModelViewSet):
