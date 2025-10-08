@@ -66,14 +66,6 @@ jobs:
         HOST: localhost
         PORT: 5432
         STRIPE_API_KEY: ${{ secrets.STRIPE_API_KEY }}
-        CELERY_RESULT_BACKEND: redis://127.0.0.1:6379/0
-        CELERY_BROKER_URL: redis://127.0.0.1:6379/0
-        EMAIL_TO_CONSOLE: ${{ secrets.EMAIL_TO_CONSOLE }}
-        EMAIL_BACKEND: ${{ secrets.EMAIL_BACKEND }}
-        EMAIL_HOST: ${{ secrets.EMAIL_HOST }}
-        EMAIL_PORT: ${{ secrets.EMAIL_PORT }}
-        EMAIL_USE_SSL: ${{ secrets.EMAIL_USE_SSL }}
-        EMAIL_USE_TLS: ${{ secrets.EMAIL_USE_TLS }}
       run: python manage.py migrate
 
     - name: Run tests
@@ -85,14 +77,6 @@ jobs:
         HOST: localhost
         PORT: 5432
         STRIPE_API_KEY: ${{ secrets.STRIPE_API_KEY }}
-        CELERY_RESULT_BACKEND: redis://127.0.0.1:6379/0
-        CELERY_BROKER_URL: redis://127.0.0.1:6379/0
-        EMAIL_TO_CONSOLE: ${{ secrets.EMAIL_TO_CONSOLE }}
-        EMAIL_BACKEND: ${{ secrets.EMAIL_BACKEND }}
-        EMAIL_HOST: ${{ secrets.EMAIL_HOST }}
-        EMAIL_PORT: ${{ secrets.EMAIL_PORT }}
-        EMAIL_USE_SSL: ${{ secrets.EMAIL_USE_SSL }}
-        EMAIL_USE_TLS: ${{ secrets.EMAIL_USE_TLS }}
       run: python manage.py test
 
   build:
