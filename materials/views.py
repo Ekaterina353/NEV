@@ -8,10 +8,13 @@ from rest_framework import generics, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import Lesson, Course, Subscription
+
+from .models import Course, Lesson, Subscription
 from .paginators import CoursePagination, LessonPagination
 from .permissions import IsOwnerOrModerator
-from .serializers import LessonSerializer, CourseSerializer, SubscriptionSerializer
+
+from .serializers import CourseSerializer, LessonSerializer
+
 
 from datetime import timedelta
 from .tasks import send_course_update_email
@@ -43,6 +46,7 @@ from .tasks import send_course_update_email
         summary="Удалить курс", description="Удалить курс", tags=["Курсы"]
     ),
 )
+
 class CourseViewSet(viewsets.ModelViewSet):
     serializer_class = CourseSerializer
     permission_classes = [IsAuthenticated]
@@ -220,12 +224,8 @@ class LessonAPIView(generics.ListAPIView):
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        if not self.request.user.groups.filter(
-            name="moders"
-        ).exists():  # если не входит в группу модеров
-            return queryset.filter(
-                owner=self.request.user
-            )  # показать для владельцев только их объекты
+        if not self.request.user.groups.filter(name="moders").exists():  # если не входит в группу модеров
+            return queryset.filter(owner=self.request.user)  # показать для владельцев только их объекты
         return queryset  # А, если входит, то весь список
 
 

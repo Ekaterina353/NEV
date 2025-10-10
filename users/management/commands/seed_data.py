@@ -20,7 +20,7 @@ class Command(BaseCommand):
         student_group, _ = Group.objects.get_or_create(name="students")
 
         # Создаем пользователей
-        admin_user = User.objects.create_superuser(
+        User.objects.create_superuser(
             email="admin@example.com",
             password="admin123",
             first_name="Admin",

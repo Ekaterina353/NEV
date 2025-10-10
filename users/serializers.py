@@ -40,9 +40,8 @@ class PaymentSerializer(serializers.ModelSerializer):
             "lesson",
             "lesson_title",
             "user",
-            'payment_id',
-            'payment_url',
-
+            "payment_id",
+            "payment_url",
         ]
         extra_kwargs = {
             "course": {"write_only": True},

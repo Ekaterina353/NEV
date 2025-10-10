@@ -1,4 +1,3 @@
-from materials.services import create_stripe_product, create_stripe_price, create_stripe_session
 import stripe
 from django.contrib.auth import get_user_model
 from django.db.models import Count, Sum
@@ -9,14 +8,14 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from config import settings
+from materials.services import create_stripe_price, create_stripe_product, create_stripe_session
 
 from .filters import PaymentFilter
 from .models import Payment
 from .permissions import IsProfileOwner
 from .serializers import (
     PaymentSerializer,
-    # PrivateProfileSerializer,
-    PublicProfileSerializer,
+    PublicProfileSerializer,  # PrivateProfileSerializer,
     UserProfileWithPaymentsSerializer,
     UserSerializer,
 )

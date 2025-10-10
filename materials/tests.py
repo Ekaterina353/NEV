@@ -1,8 +1,8 @@
 from rest_framework import status
 from rest_framework.reverse import reverse
-from rest_framework.test import APITestCase, APIClient
+from rest_framework.test import APIClient, APITestCase
 
-from materials.models import Lesson, Course, Subscription
+from materials.models import Course, Lesson, Subscription
 from users.models import User
 
 

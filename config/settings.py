@@ -1,9 +1,13 @@
-from pathlib import Path
 import os
-import dotenv
 from datetime import timedelta
+
+from pathlib import Path
+
+import dotenv
+=======
 from celery.schedules import crontab
 from django.conf.global_settings import SERVER_EMAIL
+
 
 dotenv.load_dotenv()
 
@@ -119,7 +123,7 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.IsAuthenticated",
     ],
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
-"PAGE_SIZE": 10,
+    "PAGE_SIZE": 10,
 }
 
 SIMPLE_JWT = {
@@ -127,8 +131,9 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
 }
 
-STRIPE_API_KEY = os.getenv("STRIPE_API_KEY", "sk_test_...")
-STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY", "pk_test_...")
+STRIPE_API_KEY = os.getenv("STRIPE_API_KEY")
+
+
 
 # DRF Spectacular settings
 SPECTACULAR_SETTINGS = {
@@ -184,3 +189,4 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
