@@ -1,5 +1,10 @@
 from rest_framework import serializers
+
 from .models import Course, Lesson, Subscription, Payment
+
+from users.models import Payment
+
+
 from .validators import VideoURLValidator
 
 class LessonSerializer(serializers.ModelSerializer):
